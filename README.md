@@ -46,5 +46,16 @@
 
 ## オンラインでプレイ
 
-`main` ブランチへの push 時に GitHub Pages へ自動デプロイされます（`.github/workflows/deploy.yml`）。
-公開URL: **https://bubblegumgameboy.github.io/SchoolCardGame/**
+GitHub Pages で公開できます。公開URL: **https://bubblegumgameboy.github.io/SchoolCardGame/**
+
+> 初回のみ、リポジトリ設定での有効化が必要です（自動トークンでは有効化できないため）。
+
+**かんたんな方法（ブランチ配信）**
+1. リポジトリの **Settings → Pages** を開く
+2. **Build and deployment → Source** を **「Deploy from a branch」** に
+3. Branch でこのブランチ（`claude/beautiful-cannon-sj63b1`、または merge 後の `main`）と `/(root)` を選び **Save**
+4. 1〜2分で上記URLが有効になります
+
+**GitHub Actions で自動デプロイしたい場合**
+- **Settings → Pages → Source** を **「GitHub Actions」** にすると、`.github/workflows/deploy.yml` が
+  push のたびに自動デプロイします。
