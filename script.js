@@ -213,8 +213,13 @@ function tryReveal() {
   const cell = state.grid[r][c];
 
   if (cell.revealed) {
-    flashBanner("そのカードはもうめくられています！別のマスを選んでね。");
-    // keep selections so players can change one of them
+    // This card is already flipped. Clear BOTH selections so the next flip
+    // requires Player A (row) AND Player B (color) to choose again — otherwise a
+    // stale selection could auto-flip a card when only one key is re-picked.
+    state.selRow = null;
+    state.selCol = null;
+    highlightSelections();
+    flashBanner("そのカードはもうめくられています！行と色をもう一度選び直してね。");
     return;
   }
 
@@ -346,20 +351,128 @@ function renderScoreboard() {
 
 // ---------- Game over ----------
 function gameOver() {
+  state.locked = true;
+  renderScoreboard();
+
   const max = Math.max(...state.teams.map((t) => t.score));
   const winners = state.teams.filter((t) => t.score === max);
-  let title, body;
-  if (winners.length === 1) {
-    title = `🏆 ${winners[0].name} の勝ち！`;
-    body = `${winners[0].name} が ${max}点 で優勝しました！おめでとう！🎉`;
-  } else {
-    title = "🤝 引き分け！";
-    body = `${winners.map((w) => w.name).join("・")} が ${max}点 で同点でした！`;
-  }
-  showMessage(title, body, () => {
+
+  // Final standings, sorted high -> low (ties keep input order)
+  const ranked = state.teams
+    .map((t, i) => ({ ...t, i }))
+    .sort((a, b) => b.score - a.score);
+  const medals = ["🥇", "🥈", "🥉"];
+
+  const headline =
+    winners.length === 1
+      ? `🏆 ${escapeHtml(winners[0].name)} の勝ち！`
+      : "🤝 引き分け！";
+  const sub =
+    winners.length === 1
+      ? `${escapeHtml(winners[0].name)} が ${max}点 で優勝！おめでとう！🎉`
+      : `${winners.map((w) => escapeHtml(w.name)).join("・")} が ${max}点 で同点！`;
+
+  let prevScore = null,
+    rank = 0;
+  const rows = ranked
+    .map((t, idx) => {
+      if (t.score !== prevScore) {
+        rank = idx + 1;
+        prevScore = t.score;
+      }
+      const medal = medals[rank - 1] || `${rank}位`;
+      const isWinner = t.score === max;
+      return (
+        `<div class="standing${isWinner ? " winner" : ""}">` +
+        `<span class="medal">${medal}</span>` +
+        `<span class="dot" style="background:${t.color}"></span>` +
+        `<span class="nm">${escapeHtml(t.name)}</span>` +
+        `<span class="pts">🍌 ${t.score}</span>` +
+        `</div>`
+      );
+    })
+    .join("");
+
+  // Render the celebratory game-over modal (stays until a button is pressed)
+  modalTitle.textContent = headline;
+  modalBody.innerHTML =
+    `<p class="go-sub">${sub}</p>` + `<div class="standings">${rows}</div>`;
+  modalClose.classList.add("hidden");
+  modalChoices.innerHTML = "";
+
+  const playAgain = document.createElement("button");
+  playAgain.className = "btn btn-primary";
+  playAgain.textContent = "🔄 もう一度あそぶ";
+  playAgain.onclick = () => {
+    stopConfetti();
+    modal.classList.add("hidden");
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("setup-screen").classList.remove("hidden");
-  });
+  };
+
+  const finish = document.createElement("button");
+  finish.className = "btn btn-ghost";
+  finish.textContent = "🏁 結果を閉じる";
+  finish.onclick = () => {
+    stopConfetti();
+    modal.classList.add("hidden"); // keep final board/scores on screen to review
+  };
+
+  modalChoices.append(playAgain, finish);
+  modal.classList.remove("hidden");
+
+  if (winners.length >= 1) startConfetti();
+}
+
+// ---------- Confetti celebration ----------
+let confettiTimer = null;
+function startConfetti() {
+  const layer = document.getElementById("confetti");
+  layer.innerHTML = "";
+  layer.classList.remove("hidden");
+  const colors = [
+    "#ffd93d", "#ff6b6b", "#ff9f43", "#54a0ff",
+    "#1dd1a1", "#a55eea", "#ff9ff3",
+  ];
+  const emojis = ["🍌", "🎉", "⭐", "🦍"];
+  const spawn = (n) => {
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement("span");
+      const useEmoji = Math.random() < 0.25;
+      p.className = "confetti-piece";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.animationDuration = 2.5 + Math.random() * 2 + "s";
+      p.style.animationDelay = Math.random() * 0.6 + "s";
+      if (useEmoji) {
+        p.textContent = emojis[(Math.random() * emojis.length) | 0];
+        p.style.fontSize = 18 + Math.random() * 16 + "px";
+      } else {
+        p.style.background = colors[(Math.random() * colors.length) | 0];
+        p.style.setProperty("--spin", Math.random() * 360 + "deg");
+      }
+      layer.appendChild(p);
+    }
+  };
+  spawn(120);
+  // Keep a gentle stream going so the celebration lingers while reviewing scores
+  let bursts = 0;
+  clearInterval(confettiTimer);
+  confettiTimer = setInterval(() => {
+    if (++bursts > 6) {
+      clearInterval(confettiTimer);
+      return;
+    }
+    spawn(40);
+    // Clean out finished pieces to avoid unbounded growth
+    while (layer.children.length > 400) layer.removeChild(layer.firstChild);
+  }, 1200);
+}
+
+function stopConfetti() {
+  clearInterval(confettiTimer);
+  const layer = document.getElementById("confetti");
+  layer.classList.add("hidden");
+  layer.innerHTML = "";
 }
 
 // ---------- Modal ----------

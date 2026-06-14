@@ -192,3 +192,47 @@ select, input[type="text"] {
 .modal-card h2 { margin-top: 0; }
 .modal-choices { display: grid; gap: 10px; margin: 16px 0; }
 .modal-choices .btn { width: 100%; }
+
+/* ---------- Game-over standings ---------- */
+.go-sub { font-size: 1.05rem; font-weight: bold; margin: 6px 0 14px; }
+.standings { display: grid; gap: 8px; text-align: left; }
+.standing {
+  display: flex; align-items: center; gap: 10px;
+  background: #fffaf0;
+  border: 2px solid #f0e2c0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: bold;
+}
+.standing.winner { border-color: var(--card-back); background: #fff3c4; box-shadow: 0 3px 0 rgba(0,0,0,.06); }
+.standing .medal { font-size: 1.2rem; width: 1.8em; text-align: center; flex: none; }
+.standing .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+.standing .nm { flex: 1; }
+.standing .pts { font-size: 1.1rem; }
+
+/* ---------- Confetti ---------- */
+.confetti-layer {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 20;
+}
+.confetti-layer.hidden { display: none; }
+.confetti-piece {
+  position: absolute;
+  top: -5vh;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  will-change: transform;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  line-height: 1;
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--spin, 540deg)); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece { animation-duration: 0.001s !important; opacity: 0 !important; }
+}
