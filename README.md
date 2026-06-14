@@ -30,7 +30,21 @@
 | `style.css` | スタイル |
 | `script.js` | ゲームロジック |
 
-## カスタマイズ
+## カード画像
 
-カードの絵文字（🍌 / 🦍 / 💀）は `script.js` の `faceFor()` 関数で描画しています。
-ここを `<img>` タグに差し替えれば、独自のイラスト画像を使うこともできます。
+カードのイラストは `assets/` フォルダの画像を使っています（`script.js` の `faceFor()` / `IMAGES` で指定）。
+
+| 画像 | 用途 |
+| --- | --- |
+| `assets/banana1.png` | 1点 |
+| `assets/banana2.png` | 2点 |
+| `assets/banana3.png` | 3点 |
+| `assets/gorilla.png` | ゴリラ |
+| `assets/skull.png` | スカル |
+
+差し替えたい場合は、同じ名前の画像を置き換えるだけでOKです。
+
+## オンラインでプレイ
+
+`main` ブランチへの push 時に GitHub Pages へ自動デプロイされます（`.github/workflows/deploy.yml`）。
+公開URL: **https://bubblegumgameboy.github.io/SchoolCardGame/**

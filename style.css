@@ -167,7 +167,9 @@ select, input[type="text"] {
 .card.skull { background: #2d2d3a; color: #fff; border-color: #1a1a26; }
 .card.gorilla { background: #d8dde3; border-color: #a9b2bd; }
 .card .face { display: flex; flex-direction: column; align-items: center; }
-.card .pts-label { font-size: .6rem; font-weight: bold; }
+.card .pts-label { font-size: .6rem; font-weight: bold; margin-top: -2px; }
+.card-img { width: 42px; height: 42px; object-fit: contain; display: block; }
+.card.skull .card-img, .card.gorilla .card-img { width: 48px; height: 48px; }
 
 .actions { text-align: center; margin-top: 18px; }
 

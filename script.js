@@ -158,11 +158,23 @@ function renderBoard() {
   }
 }
 
+const IMAGES = {
+  skull: "assets/skull.png",
+  gorilla: "assets/gorilla.png",
+  1: "assets/banana1.png",
+  2: "assets/banana2.png",
+  3: "assets/banana3.png",
+};
+
 function faceFor(value) {
-  if (value === "skull") return { html: "💀", cls: "skull" };
-  if (value === "gorilla") return { html: "🦍", cls: "gorilla" };
-  const bananas = "🍌".repeat(value);
-  return { html: `<span class="face">${bananas}<span class="pts-label">${value}点</span></span>`, cls: "" };
+  if (value === "skull")
+    return { html: `<img class="card-img" src="${IMAGES.skull}" alt="スカル">`, cls: "skull" };
+  if (value === "gorilla")
+    return { html: `<img class="card-img" src="${IMAGES.gorilla}" alt="ゴリラ">`, cls: "gorilla" };
+  return {
+    html: `<span class="face"><img class="card-img" src="${IMAGES[value]}" alt="バナナ${value}"><span class="pts-label">${value}点</span></span>`,
+    cls: "",
+  };
 }
 
 function applyRevealedFace(div, value) {
